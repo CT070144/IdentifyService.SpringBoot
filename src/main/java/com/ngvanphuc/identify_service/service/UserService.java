@@ -8,6 +8,7 @@ import com.ngvanphuc.identify_service.models.User;
 import com.ngvanphuc.identify_service.exception.AppException;
 import com.ngvanphuc.identify_service.exception.ErrorCode;
 import com.ngvanphuc.identify_service.mapper.UserMapper;
+import com.ngvanphuc.identify_service.repository.RoleRepository;
 import com.ngvanphuc.identify_service.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
+    RoleRepository roleRepository;
 
     public UserResponse createUser(UserCreationRequest request){
 
@@ -47,6 +49,8 @@ public class UserService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    //hasRole với scope có prefix ROLE_
+    //hasAuthority với scope thông thường
     // Check condition before call method
     public List<UserResponse> getUsers(){
         log.info("In method get user list ");
@@ -68,6 +72,9 @@ public class UserService {
         User user = userRepository.findById(userId)
                         .orElseThrow(() -> new RuntimeException("User not found"));
         userMapper.updateUser(user,request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        var roles = roleRepository.findAllById(request.getRoles()); //Trả về một list role
+        user.setRoles(new HashSet<>(roles));
         return userMapper.toUserResponse(userRepository.save(user));
     }
 

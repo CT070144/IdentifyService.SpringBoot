@@ -25,7 +25,7 @@ public class PermissionService {
     PermissionMapper permissionMapper;
 
     public PermissionResponse create(PermissionRequest request) {
-        log.info("đã vào đâyyyy");
+
         Permission permission = permissionMapper.toPermission(request);
         permission = permissionRepository.save(permission);
         return permissionMapper.toPermissionResponse(permission);

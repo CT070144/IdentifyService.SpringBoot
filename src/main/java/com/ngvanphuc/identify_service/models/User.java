@@ -1,7 +1,6 @@
 package com.ngvanphuc.identify_service.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.Valid;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

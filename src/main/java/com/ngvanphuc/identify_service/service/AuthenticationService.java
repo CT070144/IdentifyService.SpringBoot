@@ -77,9 +77,9 @@ public class AuthenticationService {
                 .subject(user.getUsername())
                 .issuer("phuc.com")
                 .issueTime(new Date())
-                .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
+                .expirationTime(new Date(Instant.now().plus(24, ChronoUnit.HOURS).toEpochMilli()))
 //                .expirationTime(new Date(System.currentTimeMillis() - 1000)) hết hạn ngay lập tức
-              //  .claim("scope", buildRole(user))
+                .claim("scope", buildRole(user))
                 .build();
         Payload payload = new Payload(jwtClaimSet.toJSONObject());
 
@@ -93,13 +93,18 @@ public class AuthenticationService {
             throw new RuntimeException(e);
         }
     }
-//    private String buildRole(User user){
-//        StringJoiner stringJoiner = new StringJoiner(" ");
-//        if(!CollectionUtils.isEmpty(user.getRoles()))
-//            user.getRoles().forEach(s -> stringJoiner.add(s));
-//        return stringJoiner.toString();
-//
-//
-//    }
+    private String buildRole(User user){
+        StringJoiner stringJoiner = new StringJoiner(" ");
+        if(!CollectionUtils.isEmpty(user.getRoles()))
+            user.getRoles().forEach(role -> {
+                stringJoiner.add("ROLE_"+role.getName());
+                if(!CollectionUtils.isEmpty(role.getPermissions()))
+                role.getPermissions()
+                        .forEach(permission -> stringJoiner.add(permission.getName()));
+            });
+        return stringJoiner.toString();
+
+
+    }
 
 }
