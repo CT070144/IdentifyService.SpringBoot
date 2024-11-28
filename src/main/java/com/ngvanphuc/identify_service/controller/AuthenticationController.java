@@ -1,9 +1,6 @@
 package com.ngvanphuc.identify_service.controller;
 
-import com.ngvanphuc.identify_service.dto.request.APIResponse;
-import com.ngvanphuc.identify_service.dto.request.AuthenticationRequest;
-import com.ngvanphuc.identify_service.dto.request.IntrospectRequest;
-import com.ngvanphuc.identify_service.dto.request.LogoutRequest;
+import com.ngvanphuc.identify_service.dto.request.*;
 import com.ngvanphuc.identify_service.dto.response.AuthenticationResponse;
 import com.ngvanphuc.identify_service.dto.response.IntrospectResponse;
 import com.ngvanphuc.identify_service.service.AuthenticationService;
@@ -46,6 +43,12 @@ public class AuthenticationController {
         authenticationService.logout(request);
         return APIResponse.<Void>builder()
                 .build();
+    }
+    @PostMapping("/refresh")
+    APIResponse<AuthenticationResponse> refreshToken(@RequestBody RefreshTokenRequest request) throws ParseException, JOSEException {
+                return APIResponse.<AuthenticationResponse>builder()
+                        .result(authenticationService.refreshToken(request))
+                        .build();
     }
 
 }

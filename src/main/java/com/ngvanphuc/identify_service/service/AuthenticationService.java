@@ -3,6 +3,7 @@ package com.ngvanphuc.identify_service.service;
 import com.ngvanphuc.identify_service.dto.request.AuthenticationRequest;
 import com.ngvanphuc.identify_service.dto.request.IntrospectRequest;
 import com.ngvanphuc.identify_service.dto.request.LogoutRequest;
+import com.ngvanphuc.identify_service.dto.request.RefreshTokenRequest;
 import com.ngvanphuc.identify_service.dto.response.AuthenticationResponse;
 import com.ngvanphuc.identify_service.dto.response.IntrospectResponse;
 import com.ngvanphuc.identify_service.exception.AppException;
@@ -32,6 +33,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.UUID;
 
@@ -118,6 +120,28 @@ public class AuthenticationService {
 
         InvalidatedToken invalidatedToken = InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
         invalidatedTokenRepository.save(invalidatedToken);
+    }
+    public AuthenticationResponse refreshToken(RefreshTokenRequest request) throws ParseException, JOSEException {
+        var signedJWT = verifyToken(request.getToken());
+
+        var jit = signedJWT.getJWTClaimsSet().getJWTID();
+        var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken =
+                InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
+
+        invalidatedTokenRepository.save(invalidatedToken);
+
+        var username = signedJWT.getJWTClaimsSet().getSubject();
+
+        var user =
+                userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+
+        var token = generateToken(user);
+
+        return AuthenticationResponse.builder().token(token).authenticated(true).build();
+
+
     }
     private  SignedJWT verifyToken(String token) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGER_KEY.getBytes());
