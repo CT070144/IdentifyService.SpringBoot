@@ -3,6 +3,7 @@ package com.ngvanphuc.identify_service.controller;
 import com.ngvanphuc.identify_service.dto.request.APIResponse;
 import com.ngvanphuc.identify_service.dto.request.AuthenticationRequest;
 import com.ngvanphuc.identify_service.dto.request.IntrospectRequest;
+import com.ngvanphuc.identify_service.dto.request.LogoutRequest;
 import com.ngvanphuc.identify_service.dto.response.AuthenticationResponse;
 import com.ngvanphuc.identify_service.dto.response.IntrospectResponse;
 import com.ngvanphuc.identify_service.service.AuthenticationService;
@@ -37,6 +38,13 @@ public class AuthenticationController {
         return APIResponse.<IntrospectResponse>builder()
                 .code(1009)
                 .result(result)
+                .build();
+    }
+    @PostMapping("/logout")
+    APIResponse<Void> logout(@RequestBody LogoutRequest request)
+    throws ParseException,JOSEException{
+        authenticationService.logout(request);
+        return APIResponse.<Void>builder()
                 .build();
     }
 

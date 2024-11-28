@@ -25,9 +25,9 @@ import javax.crypto.spec.SecretKeySpec;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    private final String[] PUBLIC_ENDPOINT = {"/users","/auth/token","auth/introspect"};
-    @Value("${jwt.signerKey}")
-    private String SIGNER_KEY;
+    private final String[] PUBLIC_ENDPOINT = {"/users","/auth/token","auth/introspect","auth/logout"};
+
+    private CustomJwtDecoder customJwtDecoder;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
        // Endpoint is allowed access without security system
@@ -42,7 +42,7 @@ public class SecurityConfig {
         Sau đó, token JWT sẽ được giải mã và kiểm tra tính hợp lệ thông qua phương thức jwtDecoder().
         Nếu token hợp lệ, yêu cầu sẽ tiếp tục và Resource Server sẽ xử lý truy cập vào tài nguyên. Nếu không hợp lệ, một lỗi (chẳng hạn như 401 Unauthorized) sẽ được trả về.
         */
-        httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder())
+        httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
                                                           .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                                                           .authenticationEntryPoint(new JwtAuthenticationEntryPoint()) // khi token(sai,hết hạn,..)
 
@@ -51,13 +51,14 @@ public class SecurityConfig {
         httpSecurity.csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable());
         return httpSecurity.build();
     }
-    @Bean
-    JwtDecoder jwtDecoder(){
-        SecretKeySpec secretKeySpec = new SecretKeySpec(SIGNER_KEY.getBytes(),"HS512");
-        return NimbusJwtDecoder.withSecretKey(secretKeySpec)
-                .macAlgorithm(MacAlgorithm.HS512)
-                .build();
-    }
+    // Replaced by customJwtDecoder
+//    @Bean
+//    JwtDecoder jwtDecoder(){
+//        SecretKeySpec secretKeySpec = new SecretKeySpec(SIGNER_KEY.getBytes(),"HS512");
+//        return NimbusJwtDecoder.withSecretKey(secretKeySpec)
+//                .macAlgorithm(MacAlgorithm.HS512)
+//                .build();
+//    }
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
